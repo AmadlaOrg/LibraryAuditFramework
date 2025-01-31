@@ -11,6 +11,7 @@ type IAudit interface {
 	IsPassed() bool
 	AuditDetails() map[string]any
 	AuditResults() map[string]any
+	AuditCmd() *cobra.Command
 }
 
 type SAudit struct {
@@ -24,14 +25,14 @@ var (
 	osOpen = os.Open
 )
 
-// Process
+// RunAudit
 //
 // Params:
 // - entity data
 // Results:
 // - isPass bool
 // - details map[string]any
-type Process func(*io.Reader) (bool, map[string]any)
+type RunAudit func(*io.Reader) (bool, map[string]any)
 
 // attachFlags
 func (s *SAudit) attachFlags() {
@@ -47,7 +48,6 @@ func (s *SAudit) attachFlags() {
 	err := s.auditCmd.MarkFlagRequired("entity")
 	if err != nil {
 		s.auditCmd.Println(err)
-		return
 	}
 }
 
@@ -108,13 +108,13 @@ func (s *SAudit) inputEntity() (*io.Reader, error) {
 }
 
 // audit
-func (s *SAudit) audit(process Process) {
+func (s *SAudit) audit(runAudit RunAudit) {
 	inputEntity, err := s.inputEntity()
 	if err != nil {
 		s.auditCmd.Println(err)
 	}
 
-	pass, details := process(inputEntity)
+	pass, details := runAudit(inputEntity)
 
 	s.isPassed = pass
 	s.auditDetails = details
@@ -143,4 +143,9 @@ func (s *SAudit) AuditDetails() map[string]any {
 // AuditResults
 func (s *SAudit) AuditResults() map[string]any {
 	return s.auditResult
+}
+
+// AuditCmd
+func (s *SAudit) AuditCmd() *cobra.Command {
+	return s.auditCmd
 }

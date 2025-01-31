@@ -5,6 +5,7 @@ import "github.com/spf13/cobra"
 type IAmadla interface {
 	Supported() map[string]any
 	Cmd() *cobra.Command
+	AmadlaCmd() *cobra.Command
 }
 
 type SAmadla struct {
@@ -27,6 +28,11 @@ func (s *SAmadla) Supported() map[string]any {
 		"applications": s.supportedApplications,
 		"entities":     s.supportedEntities,
 	}
+}
+
+// AmadlaCmd
+func (s *SAmadla) AmadlaCmd() *cobra.Command {
+	return s.amadlaCmd
 }
 
 // processSupportedApplications
