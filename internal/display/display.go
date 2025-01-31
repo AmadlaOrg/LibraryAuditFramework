@@ -9,7 +9,10 @@ import (
 	"os"
 )
 
-type IDisplay interface{}
+type IDisplay interface {
+	Display()
+	SetTableHeaders(tableHeaders []string) IDisplay
+}
 
 type SDisplay struct {
 	cmd          *cobra.Command
@@ -22,11 +25,13 @@ var (
 	yamlMarshal = yaml.Marshal
 )
 
+// attachFlags
 func (s *SDisplay) attachFlags() {
 	s.cmd.Flags().BoolP("json", "j", false, "Display output in JSON format")
 	s.cmd.Flags().BoolP("yaml", "y", false, "Display output in YAML format")
 }
 
+// Display
 func (s *SDisplay) Display() {
 	// Retrieve flags
 	jsonFlag, _ := s.cmd.Flags().GetBool("json")
@@ -47,10 +52,24 @@ func (s *SDisplay) Display() {
 	}
 }
 
+// SetTableHeaders
+func (s *SDisplay) SetTableHeaders(tableHeaders []string) IDisplay {
+	s.tableHeaders = tableHeaders
+	return s
+}
+
+// getTableHeaders
+func (s *SDisplay) getTableHeaders() []string {
+	if len(s.tableHeaders) == 0 {
+		return []string{"Category", "Key", "Value"}
+	}
+	return s.tableHeaders
+}
+
 // table is the default way the data will be displayed and that is in a table (easy to read)
 func (s *SDisplay) table() {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(s.tableHeaders)
+	table.SetHeader(s.getTableHeaders())
 
 	for category, data := range s.data {
 		switch v := data.(type) {
@@ -62,7 +81,11 @@ func (s *SDisplay) table() {
 			for key, subData := range v {
 				if subMap, ok := subData.(map[string]string); ok {
 					for subKey, subValue := range subMap {
-						table.Append([]string{category, fmt.Sprintf("%s.%s", key, subKey), subValue})
+						table.Append([]string{
+							category,
+							fmt.Sprintf("%s.%s", key, subKey),
+							subValue,
+						})
 					}
 				}
 			}
