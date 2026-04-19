@@ -13,7 +13,7 @@ install-deps: ## Installs Dependencies
 generate: ## Generate mock code
 	@echo "--->  Generating code"
 	@go generate ./...
-	@go run github.com/vektra/mockery/v2@latest
+	@go run github.com/vektra/mockery/v3@latest
 
 .PHONY: lint
 lint: ## Linting
@@ -30,7 +30,7 @@ test: ## Test code
 	@.script/test.sh
 
 .PHONY: cov
-cov: cov ## Show test coverage
+cov: ## Show test coverage
 	@go tool cover -html=.reports/coverage.out
 
 .PHONY: test-cov
@@ -90,10 +90,6 @@ clean: ## Clean bin and coverage files
 	@rm -f bin/*
 	@rm -f coverage.out
 	@rm -f .reports/*
-
-build: ## Build code
-	@echo "---> Build"
-	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -buildvcs=true -o bin/ ./
 
 .PHONY: help
 help: ## Help
